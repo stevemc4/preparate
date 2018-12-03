@@ -6,6 +6,7 @@ import ejs from 'ejs'
 import postcss from 'postcss'
 import fs from 'fs'
 import tailwindcss from 'tailwindcss'
+import nuxt from 'hapi-nuxt'
 
 const rawTailwindCssFileContent = fs.readFileSync(process.cwd() + '/tailwind.css').toString()
 
@@ -36,7 +37,7 @@ async function provision () {
     console.log('Starting Server...')
     console.log('Registering router...')
 
-    app.route(router.initialize())
+    //app.route(router.initialize())
     app.route({
         path: '/static/styles/main.css',
         method: 'GET',
@@ -47,6 +48,20 @@ async function provision () {
 
     console.log('Registering plugins...')
     await app.register(vision)
+    await app.register({
+        plugin: nuxt,
+        options: {
+            srcDir: process.cwd(),
+            head: {
+                link: [
+                    {
+                        rel: 'stylesheet',
+                        href: '/static/styles/main.css'
+                    }
+                ]
+            }
+        }
+    })
     app.views({
         engines: ({ejs}),
         path: process.cwd() + '/views'
